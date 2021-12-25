@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Two-Factor Auth</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.1/css/bulma.min.css"
+    integrity="sha256-1nEaE91OpXJD7M6W5uSiqxhdmrY+lOOTHC1iUxU9Pds=" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+  <script src="/controllers/firebaseConfig.js"></script>
+</head>
+
+<body class="content section">
+  <main>
+    <div class="container">
+      <h1>ITXI Firebase Demo</h1>
+      <div id="2fa-captcha"></div>
+      <h3>Auth State</h3>
+
+      <div id="user"></div>
+      <a class="btn" id="signin" href="signIn.html">Sign In</a>
+      <a class="btn" id="signup" href="signUp.html">Sign Up</a>
+      <a class="btn" id="enroll" href="enrollMfa.html">Enroll MFA</a>
+      <a class="btn" id="signout">Sign out</a>
+      <a class="btn" id="unenroll">UnEnroll MFA</a>
+      <a class="btn" id="verifyemail">Verify Email</a>
+      <a class="btn" id="changePassword" href="updatePassword.html">Change Password</a>
+
+    </div>
+  </main>
+  <script src="controllers/recaptcha.js"></script>
+  <script src="controllers/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Enrollment</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.1/css/bulma.min.css"
+        integrity="sha256-1nEaE91OpXJD7M6W5uSiqxhdmrY+lOOTHC1iUxU9Pds=" crossorigin="anonymous" />
+    <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+    <script src="/controllers/firebaseConfig.js"></script>
+</head>
+
+<body class="content section">
+    <main>
+        <div id="2fa-captcha"></div>
+        <h4 id="loading"></h4>
+        <div class="enroll-form">
+            <h3>Enroll in 2FA</h3>
+
+            <h5>Verify Code</h5>
+
+            <input class="input" id="enroll-code" placeholder="Verification Code">
+            <button class="btn" id="enroll-verify">Verify</button>
+        </div>
+    </main>
+    <script>const auth = firebase.auth();</script>
+    <script src="controllers/recaptcha.js"></script>
+    <script src="controllers/verifyMFAenrollment.js"></script>
+</body>
+
+</html>
