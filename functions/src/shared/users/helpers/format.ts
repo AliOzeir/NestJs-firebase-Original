@@ -1,8 +1,8 @@
 import { auth } from 'firebase-admin';
-import { UserFormat } from "../interfaces/UserFormat.interface";
+import { UserFormat } from '../interfaces/UserFormat.interface';
 
 export const format = (user: auth.UserRecord) => {
-  let userFormat: UserFormat = {
+  const userFormat: UserFormat = {
     firstName: user.displayName?.split(' ')[0]
       ? user.displayName?.split(' ')[0]
       : '',

@@ -10,7 +10,7 @@ export class SecurityService {
   // --- Send a Password Reset Email
   sendPasswordEmailReset(email: string, userIP: string, userEmail: string) {
     const auth = getAuth();
-    var ipAddress: string = userIP || '';
+    let ipAddress: string = userIP || '';
     if (userIP) {
       if (ipAddress.substr(0, 7) == '::ffff:') {
         ipAddress = ipAddress.substr(7);
@@ -124,7 +124,7 @@ export class SecurityService {
       .get()
       .then(async (docShot) => {
         if (docShot.exists) {
-          var passwords = docShot.get('passwords');
+          const passwords = docShot.get('passwords');
           if (passwords.length === 24) {
             await doc
               .update({
@@ -195,13 +195,14 @@ export class SecurityService {
   }
 
   // --- Get Users Hash Passwords
-  getUsersHashedPasswords(uid: string){
-    return this.db.collection('U-Pass')
+  getUsersHashedPasswords(uid: string) {
+    return this.db
+      .collection('U-Pass')
       .doc(uid)
       .get()
       .then((docShot) => {
         if (docShot.exists) {
-          var passwords = docShot?.data()?.passwords;
+          const passwords = docShot?.data()?.passwords;
           if (passwords !== undefined) {
             return {
               status: 200,

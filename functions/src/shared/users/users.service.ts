@@ -10,14 +10,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   // --- Get All Users
   async getAllUsers() {
-    let data: { [uid: string]: any } = {};
+    const data: { [uid: string]: any } = {};
     return getAllUsersHelper()
       .then((listUsersResult: admin.auth.UserRecord[]) => {
         if (listUsersResult.length === 0) {
           return { message: 'No Available Users', data };
         }
         listUsersResult.forEach((userRecord) => {
-          let additionalData: { [data: string]: any } = {};
+          const additionalData: { [data: string]: any } = {};
           additionalData['data'] = format(userRecord);
           additionalData['disabled'] = userRecord.disabled;
           data[userRecord.uid] = additionalData;
@@ -73,7 +73,7 @@ export class UserService {
 
   // --- Create A User
   addUser(userBody: CreateUserDto, userIP: string, userEmail: string) {
-    var ipAddress: string = userIP || '';
+    let ipAddress: string = userIP || '';
     if (userIP) {
       if (ipAddress.substr(0, 7) == '::ffff:') {
         ipAddress = ipAddress.substr(7);
@@ -141,13 +141,13 @@ export class UserService {
       .auth()
       .getUser(uid)
       .then(async (userData) => {
-        var ipAddress: string = userIP || '';
+        let ipAddress: string = userIP || '';
         if (ipAddress) {
           if (ipAddress.substr(0, 7) == '::ffff:') {
             ipAddress = ipAddress.substr(7);
           }
         }
-        var formattedUser = format(userData);
+        const formattedUser = format(userData);
         if (updatedBody.role?.trim()) {
           await admin
             .auth()
@@ -271,7 +271,7 @@ export class UserService {
 
   // --- Delete A User
   deleteUser(uid: string, userIP: string, userEmail: string) {
-    var ipAddress: string = userIP;
+    let ipAddress: string = userIP;
     if (ipAddress) {
       if (ipAddress.substr(0, 7) == '::ffff:') {
         ipAddress = ipAddress.substr(7);

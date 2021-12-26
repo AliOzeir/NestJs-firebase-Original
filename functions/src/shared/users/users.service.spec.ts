@@ -2,11 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './users.service';
 import { admin } from '../../config/firebaseConnection';
 
-const uid: string = 'RN93D6ieSwfZ7Lkn8Eeodr7BNfu2';
-const ipAddress: string = '169.192.192.23';
-const email: string = 'ali-oz@testing.com';
-const createdUserEmail: string = 'aliozeir-testingaccount@test.net';
-const uidDelete: string = 'gNfNTpbStnPqz4fwJFpM9I5x1Lj2';
+const uid = 'RN93D6ieSwfZ7Lkn8Eeodr7BNfu2';
+const ipAddress = '169.192.192.23';
+const email = 'ali-oz@testing.com';
+const createdUserEmail = 'aliozeir-testingaccount@test.net';
 
 describe('UserService', () => {
   let service: UserService;

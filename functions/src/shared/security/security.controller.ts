@@ -48,7 +48,7 @@ export class SecurityController {
   }
 
   @Post('getHashedPasswords')
-  getUsersHashedPasswords(@Body("uid") uid: string): object{
-    return this.securityService.getUsersHashedPasswords(uid)
+  getUsersHashedPasswords(@Body('uid') uid: string): object {
+    return this.securityService.getUsersHashedPasswords(uid);
   }
 }

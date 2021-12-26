@@ -1,5 +1,5 @@
-export type ResponseFormat ={
-  message: string, 
-  data?: string,
-  user?: string
-}
+export type ResponseFormat = {
+  message: string;
+  data?: string;
+  user?: string;
+};

@@ -12,7 +12,7 @@ export class AuthenticationService {
   // --- User Sign In Using Email and Password
   async signIn(email: string, password: string, ip) {
     const auth = getAuth();
-    var ipAddress: string = ip || '';
+    let ipAddress: string = ip || '';
     if (ipAddress) {
       if (ipAddress.substr(0, 7) == '::ffff:') {
         ipAddress = ipAddress.substr(7);
@@ -55,24 +55,24 @@ export class AuthenticationService {
 
   // --- User Sign Up Using Email and Password
   async createUserByEmailAndPass(email: string, password: string) {
-      const auth = getAuth();
-      return await createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          return sendEmailVerification(user).then(() => {
-            return {status: 200, message: 'Email Verification sent', user };
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          throw new HttpException(
-            {
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
-              error: error,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+    const auth = getAuth();
+    return await createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        return sendEmailVerification(user).then(() => {
+          return { status: 200, message: 'Email Verification sent', user };
         });
+      })
+      .catch((error) => {
+        console.log(error);
+        throw new HttpException(
+          {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            error: error,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      });
   }
 }

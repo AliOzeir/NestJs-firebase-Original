@@ -1,11 +1,16 @@
 import * as functions from 'firebase-functions';
-import { admin } from "../../config/firebaseConnection";
+import { admin } from '../../config/firebaseConnection';
 import { Request, Response, NextFunction } from 'express';
-import { HttpException, HttpStatus, Injectable, NestMiddleware, Req } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NestMiddleware,
+  Req,
+} from '@nestjs/common';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-
   // --- Middleware for checking Bearer Token
   async use(@Req() req: Request, res: Response, next: NextFunction) {
     functions.logger.log(
@@ -37,8 +42,8 @@ export class AuthMiddleware implements NestMiddleware {
     try {
       const decodedIdToken = await admin.auth().verifyIdToken(idToken);
       functions.logger.log('ID Token correctly decoded', decodedIdToken);
-      (<any>req).user = decodedIdToken;  
-          
+      (<any>req).user = decodedIdToken;
+
       next();
       return;
     } catch (error) {
@@ -47,4 +52,3 @@ export class AuthMiddleware implements NestMiddleware {
     }
   }
 }
-

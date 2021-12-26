@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   Param,
   Post,
   Put,
@@ -18,7 +17,7 @@ import { UserService } from './users.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get("getAllUsers")
+  @Get('getAllUsers')
   getAllUsers(): object {
     return this.userService.getAllUsers();
   }

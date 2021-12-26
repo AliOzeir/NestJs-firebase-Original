@@ -213,7 +213,7 @@ const gettingHashedPasswords = async (user) => {
   if (response.status === 500) {
     alert("Error: ", response.data.error);
   }
-  if(response.status === 200){
+  if(response.data.status === 200){
     const passwords = response.data.passwords;
     return passwords
   }

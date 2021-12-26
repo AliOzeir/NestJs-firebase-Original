@@ -2,12 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { firebaseApp } from '../../config/firebaseConfig';
 import { admin } from '../../config/firebaseConnection';
 import { SecurityService } from './security.service';
-const email: string = 'ali.ozeir@itxi.net';
-const logEmail: string = 'ali-oz@testing.com';
-const ipAddress: string = '169.192.24.1';
-const uid: string = 'RN93D6ieSwfZ7Lkn8Eeodr7BNfu2';
+const email = 'ali.ozeir@itxi.net';
+const logEmail = 'ali-oz@testing.com';
+const ipAddress = '169.192.24.1';
+const uid = 'RN93D6ieSwfZ7Lkn8Eeodr7BNfu2';
 const fakeUID = 'SG93D6ieSwfZ7Lkn8Eeodr7BNfu2';
-const password123Hashed: string =
+const password123Hashed =
   '$2b$10$i/HPqyC5zlZ9oEW3fjt/8.FcMgPe5hTQIf/SGSOt42qMc0M/wwcqW';
 describe('SecurityService', () => {
   let service: SecurityService;
@@ -88,11 +88,16 @@ describe('SecurityService', () => {
   });
 
   test("should check if it get all users' hashed passwords", (done) => {
-    service.getUsersHashedPasswords(fakeUID).then((result)=>{
-      expect(result.passwords[0]).toEqual(password123Hashed);
-      expect(result.status).toEqual(200);
-      expect(result.message).toEqual('Hashed Passwords Fetched Successfully!');
-      done();
-    }).catch(done);
+    service
+      .getUsersHashedPasswords(fakeUID)
+      .then((result) => {
+        expect(result.passwords[0]).toEqual(password123Hashed);
+        expect(result.status).toEqual(200);
+        expect(result.message).toEqual(
+          'Hashed Passwords Fetched Successfully!',
+        );
+        done();
+      })
+      .catch(done);
   });
 });
