@@ -15,7 +15,9 @@ signupBtn.onclick = async (e) => {
       email,
       password
     );
+    console.log(1, credential);
     const hashPassword = await hashFunction(password);
+    console.log(2, hashPassword);
     loading.innerHTML = "Saving Password...";
     let promises = [];
     const settingLastChangedPasswordDate = setLastChangedDate();
@@ -55,7 +57,7 @@ const hashFunction = async (password) => {
     url: "https://us-central1-itxi-train.cloudfunctions.net/app/security/hashPassword",
     headers: { Authorization: `Bearer ${token}` },
     data: {
-      password: password, // This is the body part
+      password: password,
     },
   });
   const hashPassword = response.data.hash;

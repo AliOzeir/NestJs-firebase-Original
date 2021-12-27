@@ -1,40 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SignUp</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.1/css/bulma.min.css"
-    integrity="sha256-1nEaE91OpXJD7M6W5uSiqxhdmrY+lOOTHC1iUxU9Pds=" crossorigin="anonymous" />
-  <link rel="stylesheet" href="/style.css">
-  <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignUp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.1/css/bulma.min.css"
+        integrity="sha256-1nEaE91OpXJD7M6W5uSiqxhdmrY+lOOTHC1iUxU9Pds=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="/controllers/firebaseConfig.js"></script>
-  <script>var db = firebase.firestore();</script>
+    <script>var db = firebase.firestore();</script>
 
 </head>
-
-<body class="content section">
-  <main>
+<body  class="content section">
+    <main>
     <div class="container">
-      <div id="2fa-captcha"></div>
-      <h4 id="loading"></h4>
+  <div id="2fa-captcha"></div>
+  <h4 id="loading"></h4>
 
-      <div id="signupPage">
+    <div id="signupPage">
         <h3>Sign Up and Verify Email</h3>
-
+    
         <input class="input" id="signup-email" placeholder="hello@itxi.net">
         <input type="password" class="input" id="signup-password" placeholder="*********">
-
+    
         <button class="btn" id="signup-button">Sign Up as New User</button><br>
-      </div>
     </div>
-  </main>
-  <script>const auth = firebase.auth();</script>
-  <script src="controllers/recaptcha.js"></script>
+    </div>
+    </main>
+    <script>const auth = firebase.auth();</script>
+    <script src="controllers/recaptcha.js"></script>
   <script src="controllers/signup.js"></script>
 </body>
-
 </html>
+

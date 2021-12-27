@@ -12,7 +12,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
     <script src="/controllers/firebaseConfig.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script>var db = firebase.firestore();</script>
 </head>
 
 <body class="content section">
@@ -22,19 +21,20 @@
         <div id="changePassword-form">
             <h3>Change your Account's Password</h3>
             <div class="passwords-fields">
-            <h5>New Password:</h5>
-            <input type="password" class="input" id="enroll-newPassword" placeholder="***************">
+                <h5>Current Password:</h5>
+                <input type="password" class="input" id="enroll-oldPassword" placeholder="*************">
             </div>
-            <div class="passwords-fields">
-            <h5>Confirm Password:</h5>
-            <input type="password" class="input" id="enroll-confirmPassword" placeholder="***************">
-            </div>
-            <button class="btn" id="enroll-changePassword">Change Password</button>
+            <button class="btn" id="enroll-reAuthentication">Re-Authenticate</button>
+        </div>
+        <div id="verifyCode-form">
+            <h5>Verify Code</h5>
+            <input class="input" id="login-code" placeholder="Verification code">
+            <button class="btn" id="login-verify">Verify</button>
         </div>
     </main>
     <script>const auth = firebase.auth();</script>
     <script src="controllers/recaptcha.js"></script>
-    <script src="controllers/changePassword.js"></script>
+    <script src="controllers/reAuthenticate.js"></script>
 </body>
 
 </html>

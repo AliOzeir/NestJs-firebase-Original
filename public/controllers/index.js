@@ -18,7 +18,10 @@ auth.onAuthStateChanged(async (user) => {
     changePasswordBtn.style.display = "block";
     if (user.multiFactor.enrolledFactors[0] !== undefined) {
       unerollBtn.style.display = "block";
-    } else {
+    } else if (
+      user.multiFactor.enrolledFactors[0] === undefined &&
+      user.emailVerified === true
+    ) {
       enrollBtn.style.display = "block";
     }
     if (user.emailVerified !== true) {

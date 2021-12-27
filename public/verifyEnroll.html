@@ -13,18 +13,18 @@
     <script src="/controllers/firebaseConfig.js"></script>
 </head>
 
-<body class="content section">
+<body  class="content section">
     <main>
-        <div id="2fa-captcha"></div>
-        <h4 id="loading"></h4>
-        <div class="enroll-form">
-            <h3>Enroll in 2FA</h3>
+    <div id="2fa-captcha"></div>
+    <h4 id="loading"></h4>
+    <div class="enroll-form">
+    <h3>Enroll in 2FA</h3>
 
-            <h5>Verify Code</h5>
+    <h5>Verify Code</h5>
 
-            <input class="input" id="enroll-code" placeholder="Verification Code">
-            <button class="btn" id="enroll-verify">Verify</button>
-        </div>
+    <input class="input" id="enroll-code" placeholder="Verification Code">
+    <button class="btn" id="enroll-verify">Verify</button>
+    </div>
     </main>
     <script>const auth = firebase.auth();</script>
     <script src="controllers/recaptcha.js"></script>
