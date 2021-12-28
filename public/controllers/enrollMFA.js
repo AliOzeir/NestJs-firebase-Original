@@ -6,16 +6,22 @@ const MFA_Enroll = async (phoneNumber) => {
     document.body.style.cursor = "wait";
     loading.innerHTML = `Sending Verification Code to ${phoneNumber}...`;
     const user = auth.currentUser;
+
+    // Getting Multi factor Session
     const session = await user.multiFactor.getSession();
+
+    // Initializing Phone Options
     const phoneOpts = {
       phoneNumber,
       session,
     };
+
     const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
     const verificationId = await phoneAuthProvider.verifyPhoneNumber(
       phoneOpts,
       recaptchaVerifier
     );
+    
     document.body.style.cursor = "default";
     loading.innerHTML = "";
     localStorage.setItem("verificationId", verificationId);

@@ -54,7 +54,7 @@ describe('SecurityService', () => {
     service
       .checkPasswords('password123', password123Hashed)
       .then((result) => {
-        expect(result.status).toEqual(202);
+        expect(result.status).toEqual(204);
         expect(result.message).toEqual('Passwords Matched!');
         done();
       })

@@ -14,7 +14,13 @@ export class UserService {
     return getAllUsersHelper()
       .then((listUsersResult: admin.auth.UserRecord[]) => {
         if (listUsersResult.length === 0) {
-          return { message: 'No Available Users', data };
+          throw new HttpException(
+            {
+              status: HttpStatus.NOT_FOUND,
+              message: 'No Users Found!',
+            },
+            HttpStatus.NOT_FOUND,
+          );
         }
         listUsersResult.forEach((userRecord) => {
           const additionalData: { [data: string]: any } = {};
@@ -116,10 +122,28 @@ export class UserService {
           '',
           'account_creation_failed',
           ipAddress,
-          'Error Occurred while Creating a User',
+          error.message,
           userEmail,
           '/addUser',
         );
+        if (error.code === 'auth/invalid-password') {
+          throw new HttpException(
+            {
+              status: HttpStatus.BAD_REQUEST,
+              error: error,
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        if (error.code === 'auth/email-already-exists') {
+          throw new HttpException(
+            {
+              status: HttpStatus.CONFLICT,
+              error: error,
+            },
+            HttpStatus.CONFLICT,
+          );
+        }
         throw new HttpException(
           {
             status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -156,7 +180,6 @@ export class UserService {
         return await admin
           .auth()
           .updateUser(uid, {
-            email: updatedBody.email?.trim() || formattedUser.email || '',
             phoneNumber: updatedBody.phoneNumber || userData.phoneNumber,
             displayName: `${
               updatedBody.firstName
@@ -231,7 +254,7 @@ export class UserService {
                   : "The user doesn't have email address",
                 'role_changing_failed',
                 ipAddress,
-                "Error Occurred while Changing User's Role",
+                error.message,
                 userEmail,
                 '/updateUser',
               );
@@ -244,7 +267,7 @@ export class UserService {
                   : "The user doesn't have email address",
                 'account_disabling_failed',
                 ipAddress,
-                'Error Occurred while disabling a User',
+                error.message,
                 userEmail,
                 '/updateUser',
               );
@@ -302,7 +325,7 @@ export class UserService {
               user.email ? user.email : "The user doesn't have email address",
               'account_deletion_failed',
               ipAddress,
-              'Error Occurred while Deleting a User',
+              error.message,
               userEmail,
               '/deleteUser',
             );
@@ -320,10 +343,18 @@ export class UserService {
               '',
               'account_deletion_failed',
               ipAddress,
-              'Error Occurred while Deleting a User',
+              error.message,
               userEmail,
               '/deleteUser',
             );
+            if (error.code === 'auth/user-not-found')
+              throw new HttpException(
+                {
+                  status: HttpStatus.NOT_FOUND,
+                  error: error,
+                },
+                HttpStatus.NOT_FOUND,
+              );
             throw new HttpException(
               {
                 status: HttpStatus.INTERNAL_SERVER_ERROR,

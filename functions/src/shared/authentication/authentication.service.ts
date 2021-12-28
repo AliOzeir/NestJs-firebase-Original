@@ -41,7 +41,7 @@ export class AuthenticationService {
           email,
           'login_failed',
           ipAddress,
-          'Error Occurred while Signing In',
+          error.message,
         );
         throw new HttpException(
           {

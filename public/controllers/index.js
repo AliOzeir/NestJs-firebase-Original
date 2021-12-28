@@ -27,6 +27,7 @@ auth.onAuthStateChanged(async (user) => {
     if (user.emailVerified !== true) {
       verifyEmailBtn.style.display = "block";
     }
+
     const IdTokenInfo = await user.getIdTokenResult(true);
     const lastChangedPassword = IdTokenInfo.claims.lastChangedPassword;
     const isExpired = passwordExpired(lastChangedPassword);
@@ -36,6 +37,7 @@ auth.onAuthStateChanged(async (user) => {
       );
       window.location.href = "updatePassword.html";
     }
+    
   } else {
     const signoutBtn = document.getElementById("signout");
     userEl.innerHTML = "No User is Currently Logging In";

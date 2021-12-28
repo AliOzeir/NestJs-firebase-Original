@@ -38,9 +38,18 @@ export class SecurityService {
           email,
           'reset_password_email_failed',
           ipAddress,
-          'Error Occurred while Sending Password Reset Email',
+          error.message,
           userEmail,
         );
+        if (error.code === 'auth/user-not-found') {
+          throw new HttpException(
+            {
+              status: HttpStatus.NOT_FOUND,
+              error: error,
+            },
+            HttpStatus.NOT_FOUND,
+          );
+        }
         throw new HttpException(
           {
             status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -77,7 +86,7 @@ export class SecurityService {
     try {
       const result = await bcrypt.compare(password, encryptedPassword);
       if (result) {
-        return { status: 202, message: 'Passwords Matched!' };
+        return { status: 204, message: 'Passwords Matched!' };
       } else {
         return { status: 200, message: "Passwords Doesn't Match!" };
       }
@@ -96,7 +105,7 @@ export class SecurityService {
   addChangingPasswordDate(userID: string) {
     return admin
       .auth()
-      .setCustomUserClaims(userID ? userID : '', {
+      .setCustomUserClaims(userID, {
         lastChangedPassword: new Date(),
       })
       .then(() => {
@@ -203,7 +212,7 @@ export class SecurityService {
       .then((docShot) => {
         if (docShot.exists) {
           const passwords = docShot?.data()?.passwords;
-          if (passwords !== undefined) {
+          if (passwords !== undefined || passwords.length !== 0) {
             return {
               status: 200,
               message: 'Hashed Passwords Fetched Successfully!',
@@ -212,10 +221,10 @@ export class SecurityService {
           } else {
             throw new HttpException(
               {
-                status: HttpStatus.CONFLICT,
+                status: HttpStatus.NOT_FOUND,
                 message: 'No Passwords in Firestore!',
               },
-              HttpStatus.INTERNAL_SERVER_ERROR,
+              HttpStatus.NOT_FOUND,
             );
           }
         }

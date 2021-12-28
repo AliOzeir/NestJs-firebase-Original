@@ -58,7 +58,7 @@ const allProcess = async (newPassword) => {
     loading.innerHTML = "Checking Previous Passwords...";
     const statusArray = await Promise.all(statusPromises);
     for (let i = 0; i < statusArray.length; i++) {
-      if (statusArray[i] === 202) isMatched = true;
+      if (statusArray[i] === 204) isMatched = true;
     }
   }
     if (isMatched) {
