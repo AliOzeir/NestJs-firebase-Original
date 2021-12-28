@@ -25,18 +25,18 @@ describe('SecurityService', () => {
     await doc.delete();
   });
 
-  // test('should check if it sends password email reset', (done) => {
-  //   service
-  //     .sendPasswordEmailReset('ali.ozeir@itxi.net', ipAddress, logEmail)
-  //     .then((response) => {
-  //       expect(response.message).toEqual(
-  //         `Hi ${email}, You have Successfully Received Password Reset Email`,
-  //       );
-  //       expect(response.status).toEqual(201);
-  //       done();
-  //     })
-  //     .catch(done);
-  // });
+  test('should check if it sends password email reset', (done) => {
+    service
+      .sendPasswordEmailReset('ali.ozeir@itxi.net', ipAddress, logEmail)
+      .then((response) => {
+        expect(response.message).toEqual(
+          `Hi ${email}, You have Successfully Received Password Reset Email`,
+        );
+        expect(response.status).toEqual(201);
+        done();
+      })
+      .catch(done);
+  });
 
   test('should check if it hashes the password', (done) => {
     service

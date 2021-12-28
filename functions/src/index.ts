@@ -28,3 +28,15 @@ export const app = functions.https.onRequest(server);
 exports.disableInactiveUsers = functions.pubsub
   .schedule('0 0 * * *')
   .onRun(disableInactiveUsers);
+  
+// test('if it delete a user', (done) => {
+  //   service
+  //     .deleteUser(uidDelete, ipAddress, email)
+  //     .then((user) => {
+  //       expect(user.message).toEqual('User Successfully deleted');
+  //       expect(user.user.uid).toEqual(uidDelete);
+  //       expect(user.status).toEqual(200);
+  //       done();
+  //     })
+  //     .catch(done);
+  // });

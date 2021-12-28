@@ -5,3 +5,4 @@ const recaptchaVerifier = new firebase.auth.RecaptchaVerifier("2fa-captcha", {
     console.log("Captcha Successfully Solved!");
   },
 });
+  

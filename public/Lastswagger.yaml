@@ -1,0 +1,352 @@
+openapi: 3.0.1
+info:
+  title: User Management
+  description: User Management API documentation
+  version: '0.1'
+servers:
+  - url: https://us-central1-itxi-train.cloudfunctions.net
+paths:
+  /app/userAuth/signIn:
+    post:
+      description: Sign in user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                email:
+                  type: string
+            examples:
+              '0':
+                value: "{\r\n    \"email\":\"alioz-testing1234@gmail.com\",\r\n    \"password\": \"password123\"\r\n}"
+      responses:
+        '201':
+          description: User Successfully Signed In
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/userAuth/signUp:
+    post:
+      description: Sign Up
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                email:
+                  type: string
+            examples:
+              '0':
+                value: "{\r\n    \"email\":\"alioz-testing123@gmail.com\",\r\n    \"password\": \"password123\"\r\n}"
+      responses:
+        '201':
+          description: User Successfully Signed Up
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/users/getAllusers:
+    get:
+      description: API to get all users
+      responses:
+        '200':
+          description: Fetched All Users
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/users/createUser:
+    post:
+      description: API to create a users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreation'
+      responses:
+        '200':
+          description: Creates a new User
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/users/updateUser/{uid}:
+    put:
+      description: API to change user's information
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          description: id of user that need to be updated
+          schema:
+            type: string 
+            example: rj6PYn5eGAU5ANZyfojsQCtJV5t2
+          
+      requestBody:
+          required: true
+          description: Updated a User 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User has been updated
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/users/getUser/{uid}:
+    get:
+      description: API to get user's information
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          description: id of user that need to be fetched
+          schema:
+            type: string 
+            example: rj6PYn5eGAU5ANZyfojsQCtJV5t2    
+      responses:
+        '200':
+          description: User has been fetched
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/users/deleteUser/{uid}:
+    delete:
+      description: API to delete user's information
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          description: id of user that need to be fetched
+          schema:
+            type: string 
+            example: rj6PYn5eGAU5ANZyfojsQCtJV5t2    
+      responses:
+        '200':
+          description: User has been deleted
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/security/sendPasswordResetEmail:
+    post:
+      description: Password reset email has been sent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+            examples:
+              '0':
+                value: "{\r\n    \"email\": \"aozeir5@gmail.com\"\r\n}"
+      responses:
+        '201':
+          description: Successfully Password reset email has been sent 
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/security/hashPassword:
+    post:
+      description: Hash password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+            examples:
+              '0':
+                value: "{\r\n    \"password\": \"password123\"\r\n}"
+      responses:
+        '201':
+          description: Hashed Password Successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/security/setNewPassword:
+    post:
+      description: Set New Password in Firestore
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uid:
+                  type: string
+                hashPassword:
+                  type: string
+            examples:
+              '0':
+                value: |-
+                  {
+                    "uid": "RN93D6ieSwfZ7Lkn8Eeodr7BNfu2",
+                     "hashPassword": "$2b$10$cOaZvE1P.Nn33SLTbWieZO1OwB0dx8lmJq4CeQOavro0Lxu.BMdlC"
+                  }
+      responses:
+        '201':
+          description: New Password has been added to firestore
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/security/checkPasswords:
+    post:
+      description: Check two Passwords if they match
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                EncryptedPassword:
+                  type: string
+            examples:
+              '0':
+                value: "{\r\n    \"password\": \"password123\",\r\n    \"EncryptedPassword\": \"$2b$10$i/HPqyC5zlZ9oEW3fjt/8.FcMgPe5hTQIf/SGSOt42qMc0M/wwcqW\"\r\n}"
+      responses:
+        '201':
+          description: Passwords Matched!
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/security/getHashedPasswords:
+    post:
+      description: Get User's Hashed Passwords
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uid:
+                  type: string
+            examples:
+              '0':
+                value: |-
+                  {
+                      "uid": "RN93D6ieSwfZ7Lkn8Eeodr7BNfu2"
+                  }
+      responses:
+        '201':
+          description: All User's hashed Password have been fetched successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+  /app/security/addChangingPasswordDate:
+    post:
+      description: Add Last Changed Password Date
+      responses:
+        '201':
+          description: Last Changed Password Date added successfully
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://us-central1-itxi-train.cloudfunctions.net
+components:
+  schemas:
+    User:
+      description: contain user's infomation
+      properties:
+        firstName:
+          type: string
+          example: Ali                
+        lastName:
+          type: string
+          example: Ozeir              
+        role:
+          type: string
+          example: Developer
+        email:
+          type: string
+          example: ali-ozeir-test-22@gmail.com
+    UserCreation:
+      description: contain user's infomation
+      properties:
+        firstName:
+          type: string
+          example: John      
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          example: test@test.com
+        password:
+          type: string
+          example: password
+        phoneNumber:
+          type: string
+          example: +96100112233       
+        role:
+          type: string
+          example: Developer
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+# 2) Apply the security globally to all operations
+security:
+  - bearerAuth: []  

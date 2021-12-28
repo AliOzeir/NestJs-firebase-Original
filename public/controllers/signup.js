@@ -3,7 +3,6 @@ const signupBtn = document.getElementById("signup-button");
 signupBtn.onclick = async (e) => {
   e.preventDefault();
   document.body.style.cursor = "wait";
-  const timeInitial = new Date().getTime();
   const email = document.getElementById("signup-email").value.trim();
   const password = document.getElementById("signup-password").value;
   const loading = document.getElementById("loading");
@@ -15,12 +14,12 @@ signupBtn.onclick = async (e) => {
       email,
       password
     );
-    console.log(1, credential);
     const hashPassword = await hashFunction(password);
-    console.log(2, hashPassword);
     loading.innerHTML = "Saving Password...";
     let promises = [];
-    const settingLastChangedPasswordDate = setLastChangedDate();
+
+    const settingLastChangedPasswordDate = setLastChangedDate(); // HERE 
+
     promises.push(settingLastChangedPasswordDate);
     const settingNewPassword = setNewPassword(hashPassword, credential.user);
     promises.push(settingNewPassword);
@@ -28,8 +27,6 @@ signupBtn.onclick = async (e) => {
     const sendingEmail = credential.user.sendEmailVerification();
     promises.push(sendingEmail);
     await Promise.all(promises);
-    const timeFinal = new Date().getTime();
-    const timeTaken = (timeFinal - timeInitial) / 1000;
     document.body.style.cursor = "default";
     loading.innerHTML = "Done.";
     alert("An Email Verification link has been sent. Please Check your email!");
@@ -43,7 +40,7 @@ signupBtn.onclick = async (e) => {
 
 const setLastChangedDate = async () => {
   const token = await auth.currentUser.getIdToken();
-  const response = await axios({
+  await axios({
     method: "post",
     url: "https://us-central1-itxi-train.cloudfunctions.net/app/security/addChangingPasswordDate",
     headers: { Authorization: `Bearer ${token}` },

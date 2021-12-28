@@ -76,15 +76,4 @@ describe('UserService', () => {
       .catch(done);
   });
 
-  // test('if it delete a user', (done) => {
-  //   service
-  //     .deleteUser(uidDelete, ipAddress, email)
-  //     .then((user) => {
-  //       expect(user.message).toEqual('User Successfully deleted');
-  //       expect(user.user.uid).toEqual(uidDelete);
-  //       expect(user.status).toEqual(200);
-  //       done();
-  //     })
-  //     .catch(done);
-  // });
 });

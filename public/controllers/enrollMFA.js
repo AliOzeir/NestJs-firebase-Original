@@ -17,7 +17,6 @@ const MFA_Enroll = async (phoneNumber) => {
       recaptchaVerifier
     );
     document.body.style.cursor = "default";
-
     loading.innerHTML = "";
     localStorage.setItem("verificationId", verificationId);
     window.location.href = "verifyEnroll.html";
