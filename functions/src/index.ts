@@ -6,6 +6,8 @@ import * as cors from 'cors';
 import * as functions from 'firebase-functions';
 import { disableInactiveUsers } from './shared/scheduled/disableUsers.scheduled';
 import { firebaseApp } from './config/firebaseConfig';
+import { AuthenticationService } from './shared/authentication/authentication.service';
+import { AuthenticationController } from './shared/authentication/authentication.controller';
 
 const server = express();
 server.use(express.json());
@@ -28,4 +30,3 @@ exports.app = functions.https.onRequest(server);
 exports.disableInactiveUsers = functions.pubsub
   .schedule('0 0 * * *')
   .onRun(disableInactiveUsers);
-  

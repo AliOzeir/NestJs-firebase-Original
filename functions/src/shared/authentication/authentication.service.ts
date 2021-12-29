@@ -36,13 +36,28 @@ export class AuthenticationService {
         };
       })
       .catch((error) => {
-        writeLogEntry(
-          'ERROR',
-          email,
-          'login_failed',
-          ipAddress,
-          error.message,
-        );
+        writeLogEntry('ERROR', email, 'login_failed', ipAddress, error.message);
+        if (
+          error.code === 'auth/user-not-found' ||
+          error.code === 'auth/wrong-password'
+        ) {
+          throw new HttpException(
+            {
+              status: HttpStatus.UNAUTHORIZED,
+              error: error,
+            },
+            HttpStatus.UNAUTHORIZED,
+          );
+        }
+        if (error.code === 'auth/multi-factor-auth-required') {
+          throw new HttpException(
+            {
+              status: HttpStatus.PRECONDITION_REQUIRED,
+              error: error,
+            },
+            HttpStatus.PRECONDITION_REQUIRED,
+          );
+        }
         throw new HttpException(
           {
             status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -61,7 +76,7 @@ export class AuthenticationService {
         // Signed in
         const user = userCredential.user;
         return sendEmailVerification(user).then(() => {
-          return { status: 200, message: 'Email Verification sent', user };
+          return { status: HttpStatus.CREATED, message: 'Email Verification sent', user };
         });
       })
       .catch((error) => {

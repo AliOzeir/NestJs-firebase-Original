@@ -322,7 +322,7 @@ components:
           type: string
           example: ali-ozeir-test-22@gmail.com
     UserCreation:
-      description: contain user's infomation
+      description: contain user's information
       properties:
         firstName:
           type: string

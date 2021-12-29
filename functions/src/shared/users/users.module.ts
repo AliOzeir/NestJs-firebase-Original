@@ -17,11 +17,11 @@ export class UserModule implements NestModule {
     consumer
       .apply(AuthMiddleware)
       .forRoutes(
-        { path: 'users/getAllUsers', method: RequestMethod.GET },
-        { path: 'users/getUser/:uid', method: RequestMethod.GET },
-        { path: 'users/createUser', method: RequestMethod.POST },
-        { path: 'users/updateUser/:uid', method: RequestMethod.PUT },
-        { path: 'users/deleteUser/:uid', method: RequestMethod.DELETE },
+        { path: 'admin/getAllUsers', method: RequestMethod.GET },
+        { path: 'admin/getUser/:uid', method: RequestMethod.GET },
+        { path: 'admin/createUser', method: RequestMethod.POST },
+        { path: 'admin/updateUser/:uid', method: RequestMethod.PUT },
+        { path: 'admin/deleteUser/:uid', method: RequestMethod.DELETE },
       );
   }
 }

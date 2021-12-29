@@ -15,11 +15,11 @@ import { SecurityService } from './security.service';
 export class SecurityModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes(
-      { path: 'security/sendPasswordResetEmail', method: RequestMethod.POST },
-      { path: 'security/hashPassword', method: RequestMethod.POST },
-      { path: 'security/checkPasswords', method: RequestMethod.POST },
+      { path: 'admin/sendPasswordResetEmail', method: RequestMethod.POST },
+      { path: 'admin/hashPassword', method: RequestMethod.POST },
+      { path: 'admin/checkPasswords', method: RequestMethod.POST },
       {
-        path: 'security/addChangingPasswordDate',
+        path: 'admin/addChangingPasswordDate',
         method: RequestMethod.POST,
       },
     );

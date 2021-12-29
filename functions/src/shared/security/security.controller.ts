@@ -1,12 +1,13 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { SecurityService } from './security.service';
 
-@Controller('security')
+@Controller('admin')
 export class SecurityController {
   constructor(private readonly securityService: SecurityService) {}
 
   @Post('sendPasswordResetEmail')
+  @HttpCode(200)
   sendPasswordEmailReset(
     @Req() req: Request,
     @Body('email') email: string,
@@ -21,11 +22,13 @@ export class SecurityController {
   }
 
   @Post('hashPassword')
+  @HttpCode(200)
   hashPassword(@Body('password') password: string): object {
     return this.securityService.hashPassword(password);
   }
 
   @Post('checkPasswords')
+  @HttpCode(200)
   checkPasswords(
     @Body('password') password: string,
     @Body('EncryptedPassword') encryptedPassword: string,
@@ -34,6 +37,7 @@ export class SecurityController {
   }
 
   @Post('addChangingPasswordDate')
+  @HttpCode(200)
   addChangingPasswordDate(@Req() req: Request): object {
     const userID: string = (<any>req).user.uid;
     return this.securityService.addChangingPasswordDate(userID);
@@ -48,6 +52,7 @@ export class SecurityController {
   }
 
   @Post('getHashedPasswords')
+  @HttpCode(200)
   getUsersHashedPasswords(@Body('uid') uid: string): object {
     return this.securityService.getUsersHashedPasswords(uid);
   }

@@ -28,7 +28,7 @@ export class SecurityService {
           userEmail,
         );
         return {
-          status: HttpStatus.CREATED,
+          status: HttpStatus.OK,
           message: `Hi ${email}, You have Successfully Received Password Reset Email`,
         };
       })
@@ -66,7 +66,7 @@ export class SecurityService {
       const salt = await bcrypt.genSalt(10);
       const hash = await bcrypt.hash(password, salt);
       return {
-        status: HttpStatus.CREATED,
+        status: HttpStatus.OK,
         message: 'Password Hashed Successfully!',
         hash,
       };
@@ -110,7 +110,7 @@ export class SecurityService {
       })
       .then(() => {
         return {
-          status: HttpStatus.CREATED,
+          status: HttpStatus.OK,
           message:
             'Last Changed Password Date added Successfully to the Custom Claims!',
         };
@@ -155,7 +155,7 @@ export class SecurityService {
             })
             .then(() => {
               return {
-                status: 200,
+                status: HttpStatus.CREATED,
                 message:
                   'Hashed Password has been Successfully added to Firestore!',
               };
@@ -176,7 +176,7 @@ export class SecurityService {
             })
             .then(() => {
               return {
-                status: 200,
+                status: HttpStatus.CREATED,
                 message:
                   'Hashed Password has been Successfully added to Firestore!',
               };
@@ -214,7 +214,7 @@ export class SecurityService {
           const passwords = docShot?.data()?.passwords;
           if (passwords !== undefined || passwords.length !== 0) {
             return {
-              status: 200,
+              status: HttpStatus.OK,
               message: 'Hashed Passwords Fetched Successfully!',
               passwords,
             };
