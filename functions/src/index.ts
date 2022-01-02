@@ -6,8 +6,7 @@ import * as cors from 'cors';
 import * as functions from 'firebase-functions';
 import { disableInactiveUsers } from './shared/scheduled/disableUsers.scheduled';
 import { firebaseApp } from './config/firebaseConfig';
-import { AuthenticationService } from './shared/authentication/authentication.service';
-import { AuthenticationController } from './shared/authentication/authentication.controller';
+import { signIn, signUp } from './shared/authentication/authentication';
 
 const server = express();
 server.use(express.json());
@@ -26,7 +25,10 @@ createNestServer(server)
   .then(() => console.log('Nest Ready'))
   .catch((err) => console.error('Nest broken', err));
 
-exports.app = functions.https.onRequest(server);
+// exports.admin = functions.https.onRequest(server);
+exports.admin = functions.https.onRequest(server);
 exports.disableInactiveUsers = functions.pubsub
   .schedule('0 0 * * *')
-  .onRun(disableInactiveUsers);
+  .onRun(() => disableInactiveUsers(90));
+exports.signin = functions.https.onRequest(signIn);
+exports.signup = functions.https.onRequest(signUp);

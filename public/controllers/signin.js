@@ -1,3 +1,6 @@
+const verifyForm = document.getElementById("verifyCode");
+verifyForm.style.display = "none";
+
 // Sign In Function
 const signIn = async (email, password) => {
   const loading = document.getElementById("loading");
@@ -6,6 +9,7 @@ const signIn = async (email, password) => {
   document.body.style.cursor = "wait";
   try {
     await auth.signInWithEmailAndPassword(email, password);
+    
     loading.innerHTML = "Done.";
     document.body.style.cursor = "default";
     window.location.href = "index.html";
@@ -67,8 +71,6 @@ const verify_MFA_Login = async (code) => {
   }
 };
 
-const verifyForm = document.getElementById("verifyCode");
-verifyForm.style.display = "none";
 //  Login with MFA
 const loginBtn = document.getElementById("login-button");
 loginBtn.onclick = async (e) => {

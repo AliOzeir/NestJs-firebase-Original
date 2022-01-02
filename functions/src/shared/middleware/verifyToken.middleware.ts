@@ -16,19 +16,15 @@ export class AuthMiddleware implements NestMiddleware {
     functions.logger.log(
       'Check if request is authorized with Firebase ID token',
     );
+
     if (
       !req.headers.authorization ||
       !req.headers.authorization.startsWith('Bearer ')
-    ) {
-      functions.logger.error(
-        'No Firebase ID token was passed as a Bearer token in the Authorization header.',
-        'Make sure you authorize your request by providing the following HTTP header:',
-        'Authorization: Bearer <Firebase ID Token>',
-      );
+    )
       throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
-    }
 
     let idToken: string;
+
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer ')
@@ -38,12 +34,10 @@ export class AuthMiddleware implements NestMiddleware {
     } else {
       throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
     }
-
     try {
       const decodedIdToken = await admin.auth().verifyIdToken(idToken);
       functions.logger.log('ID Token correctly decoded', decodedIdToken);
       (<any>req).user = decodedIdToken;
-
       next();
       return;
     } catch (error) {

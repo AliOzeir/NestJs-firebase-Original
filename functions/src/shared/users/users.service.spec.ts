@@ -30,9 +30,10 @@ describe('UserService', () => {
   test('if it gets all users', (done) => {
     service
       .getAllUsers()
-      .then((users) => {
-        expect(users.message).toEqual('Fetched All Users Successfully!');
-        expect(users.data).not.toBeNull();
+      .then((response) => {
+        expect(response.message).toEqual('Fetched All Users Successfully!');
+        expect.objectContaining(response.data);
+        expect(response.data).toBeNull();
         done();
       })
       .catch(done);
@@ -44,7 +45,7 @@ describe('UserService', () => {
       .then((user) => {
         expect(user.message).toEqual('Fetched User Successfully!');
         expect(user.user.uid).toEqual(uid);
-        expect(user.status).toEqual(200);
+        expect(200);
         done();
       })
       .catch(done);
@@ -54,7 +55,6 @@ describe('UserService', () => {
     service
       .addUser({ email: createdUserEmail }, ipAddress, email)
       .then((user) => {
-        expect(user.status).toEqual(201);
         expect(user.message).toEqual('User Successfully Created');
         expect(user.user.email).toEqual('aliozeir-testingaccount@test.net');
         done();
@@ -66,7 +66,6 @@ describe('UserService', () => {
     service
       .updateUser({ role: 'Developer' }, uid, ipAddress, email)
       .then((user) => {
-        expect(user.status).toEqual(200);
         expect(user.success).toEqual(true);
         expect(user.versionNumber).toEqual('0.1.0');
         expect(user.message).toEqual('success');
@@ -75,5 +74,4 @@ describe('UserService', () => {
       })
       .catch(done);
   });
-
 });

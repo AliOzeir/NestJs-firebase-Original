@@ -14,13 +14,10 @@ export class UserService {
     return getAllUsersHelper()
       .then((listUsersResult: admin.auth.UserRecord[]) => {
         if (listUsersResult.length === 0) {
-          throw new HttpException(
-            {
-              status: HttpStatus.NOT_FOUND,
-              message: 'No Users Found!',
-            },
-            HttpStatus.NOT_FOUND,
-          );
+          return {
+            message: 'No Available Users!',
+            data: [],
+          };
         }
         listUsersResult.forEach((userRecord) => {
           const additionalData: { [data: string]: any } = {};
@@ -29,7 +26,6 @@ export class UserService {
           data[userRecord.uid] = additionalData;
         });
         return {
-          status: HttpStatus.OK,
           message: 'Fetched All Users Successfully!',
           data,
         };
@@ -52,7 +48,6 @@ export class UserService {
       .getUser(uid)
       .then((user) => {
         return {
-          status: HttpStatus.OK,
           message: 'Fetched User Successfully!',
           user,
         };
@@ -111,7 +106,6 @@ export class UserService {
           '/addUser',
         );
         return {
-          status: HttpStatus.CREATED,
           message: 'User Successfully Created',
           user,
         };
@@ -126,15 +120,6 @@ export class UserService {
           userEmail,
           '/addUser',
         );
-        if (error.code === 'auth/invalid-password') {
-          throw new HttpException(
-            {
-              status: HttpStatus.BAD_REQUEST,
-              error: error,
-            },
-            HttpStatus.BAD_REQUEST,
-          );
-        }
         if (error.code === 'auth/email-already-exists') {
           throw new HttpException(
             {
@@ -235,7 +220,6 @@ export class UserService {
             }
             const finalUserFormat = format(user);
             return {
-              status: HttpStatus.OK,
               user: finalUserFormat,
               message: 'success',
               success: true,
@@ -289,6 +273,23 @@ export class UserService {
               HttpStatus.INTERNAL_SERVER_ERROR,
             );
           });
+      })
+      .catch((error) => {
+        if (error.code === 'auth/user-not-found')
+          throw new HttpException(
+            {
+              status: HttpStatus.NOT_FOUND,
+              error: error,
+            },
+            HttpStatus.NOT_FOUND,
+          );
+        throw new HttpException(
+          {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            error: error,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       });
   }
 
@@ -317,7 +318,7 @@ export class UserService {
               userEmail,
               '/deleteUser',
             );
-            return { status: 200, message: 'User Successfully deleted', user };
+            return { message: 'User Successfully deleted', user };
           })
           .catch((error) => {
             writeLogEntry(
@@ -363,6 +364,32 @@ export class UserService {
               HttpStatus.INTERNAL_SERVER_ERROR,
             );
           });
+      })
+      .catch((error) => {
+        writeLogEntry(
+          'ERROR',
+          '',
+          'account_deletion_failed',
+          ipAddress,
+          error.message,
+          userEmail,
+          '/deleteUser',
+        );
+        if (error.code === 'auth/user-not-found')
+          throw new HttpException(
+            {
+              status: HttpStatus.NOT_FOUND,
+              error: error,
+            },
+            HttpStatus.NOT_FOUND,
+          );
+        throw new HttpException(
+          {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            error: error,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       });
   }
 }

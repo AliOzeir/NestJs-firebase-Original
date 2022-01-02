@@ -14,14 +14,9 @@ signupBtn.onclick = async (e) => {
       email,
       password
     );
-    const hashPassword = await hashFunction(password);
     loading.innerHTML = "Saving Password...";
     let promises = [];
-
-    const settingLastChangedPasswordDate = setLastChangedDate(); // HERE 
-
-    promises.push(settingLastChangedPasswordDate);
-    const settingNewPassword = setNewPassword(hashPassword, credential.user);
+    const settingNewPassword = setPasswordInDB(password);
     promises.push(settingNewPassword);
     loading.innerHTML = "Sending Email Verification Link...";
     const sendingEmail = credential.user.sendEmailVerification();
@@ -38,41 +33,17 @@ signupBtn.onclick = async (e) => {
   }
 };
 
-const setLastChangedDate = async () => {
-  const token = await auth.currentUser.getIdToken();
-  await axios({
-    method: "post",
-    url: "https://us-central1-itxi-train.cloudfunctions.net/app/security/addChangingPasswordDate",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-};
-
-const hashFunction = async (password) => {
+const setPasswordInDB = async (password) => {
   const token = await auth.currentUser.getIdToken();
   const response = await axios({
     method: "post",
-    url: "https://us-central1-itxi-train.cloudfunctions.net/app/security/hashPassword",
+    url: "https://us-central1-itxi-train.cloudfunctions.net/admin/setPasswordInDB",
     headers: { Authorization: `Bearer ${token}` },
     data: {
-      password: password,
+      password,
     },
   });
-  const hashPassword = response.data.hash;
-  return hashPassword;
-};
-
-const setNewPassword = async (hashPassword, user) => {
-  const token = await auth.currentUser.getIdToken();
-    const response = await axios({
-      method: "post",
-      url: "https://us-central1-itxi-train.cloudfunctions.net/app/security/setNewPassword",
-      headers: { Authorization: `Bearer ${token}` },
-      data: {
-        uid: user.uid,
-        hashPassword,
-      },
-    });
-    if (response.status === 500) {
-      alert("Error:", response.data.error);
-    }
+  if (response.status === 500) {
+    alert("Error:", response.data.error);
+  }
 };

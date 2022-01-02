@@ -24,14 +24,13 @@ export class AuthenticationService {
         const user = userCredential.user;
         writeLogEntry(
           'INFO',
-          user.email ? user.email : '',
+          user.email,
           'login_success',
           ipAddress,
           'User has Sign In Successfully',
         );
         return {
-          status: HttpStatus.OK,
-          message: `Hi ${user.email}, You have Successfully Signed In`,
+          message: 'User Successfully Signed In',
           user,
         };
       })
@@ -76,11 +75,19 @@ export class AuthenticationService {
         // Signed in
         const user = userCredential.user;
         return sendEmailVerification(user).then(() => {
-          return { status: HttpStatus.CREATED, message: 'Email Verification sent', user };
+          return { message: 'User Successfully Signed Up', user };
         });
       })
       .catch((error) => {
-        console.log(error);
+        if (error.code === 'auth/email-already-in-use') {
+          throw new HttpException(
+            {
+              status: HttpStatus.CONFLICT,
+              error: error,
+            },
+            HttpStatus.CONFLICT,
+          );
+        }
         throw new HttpException(
           {
             status: HttpStatus.INTERNAL_SERVER_ERROR,

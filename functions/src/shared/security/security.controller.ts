@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { SecurityService } from './security.service';
 
-@Controller('admin')
+@Controller('')
 export class SecurityController {
   constructor(private readonly securityService: SecurityService) {}
 
@@ -21,39 +21,35 @@ export class SecurityController {
     );
   }
 
-  @Post('hashPassword')
-  @HttpCode(200)
-  hashPassword(@Body('password') password: string): object {
-    return this.securityService.hashPassword(password);
-  }
-
-  @Post('checkPasswords')
-  @HttpCode(200)
-  checkPasswords(
+  @Post('setPasswordInDB')
+  setPasswordInDB(
+    @Req() req: Request,
     @Body('password') password: string,
-    @Body('EncryptedPassword') encryptedPassword: string,
   ): object {
-    return this.securityService.checkPasswords(password, encryptedPassword);
+    const uid: string = (<any>req).user.uid;
+    return this.securityService.setPasswordInDB(uid, password);
   }
 
   @Post('addChangingPasswordDate')
-  @HttpCode(200)
+  @HttpCode(201)
   addChangingPasswordDate(@Req() req: Request): object {
     const userID: string = (<any>req).user.uid;
     return this.securityService.addChangingPasswordDate(userID);
   }
 
-  @Post('setNewPassword')
-  setNewPassword(
-    @Body('uid') uid: string,
-    @Body('hashPassword') hashPassword: string,
+  @Post('checkPreviousPasswords')
+  @HttpCode(200)
+  checkPreviousPasswords(
+    @Req() req: Request,
+    @Body('password') password: string,
   ): object {
-    return this.securityService.setNewPassword(uid, hashPassword);
+    const uid: string = (<any>req).user.uid;
+    return this.securityService.checkPreviousPasswords(uid, password);
   }
 
-  @Post('getHashedPasswords')
+  @Post('disableInactiveUsers')
   @HttpCode(200)
-  getUsersHashedPasswords(@Body('uid') uid: string): object {
-    return this.securityService.getUsersHashedPasswords(uid);
+  disableInactiveUsers(@Body('NumDays') numDays: number): object {
+    return this.securityService.disableInactiveUsers(numDays);
   }
 }

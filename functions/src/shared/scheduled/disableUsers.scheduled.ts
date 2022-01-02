@@ -1,16 +1,41 @@
 import * as functions from 'firebase-functions';
 import { writeLogEntry } from '../logs/logs';
 import { admin } from '../../config/firebaseConnection';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
-export const disableInactiveUsers = async () => {
-  const inactiveUsers: admin.auth.UserRecord[] = await getInactiveUsers();
-  const promises = [];
-  for (const i in inactiveUsers) {
-    const p = disableUser(inactiveUsers[i]);
-    promises.push(p);
+export const disableInactiveUsers = async (numDays: number) => {
+  try {
+    const inactiveUsers: admin.auth.UserRecord[] = await getInactiveUsers(
+      numDays,
+    );
+    if (inactiveUsers.length === 0) {
+      return {
+        message: 'No Inactive users to disable!',
+        disabledUsersEmails: [],
+      };
+    } else {
+      const promises = [];
+      const UsersEmails = [];
+      for (const i in inactiveUsers) {
+        UsersEmails.push(inactiveUsers[i].email);
+        const p = disableUser(inactiveUsers[i]);
+        promises.push(p);
+      }
+      await Promise.all(promises);
+      return {
+        message: 'Some Users have been disabled Successfully',
+        disabledUsersEmails: UsersEmails,
+      };
+    }
+  } catch (error) {
+    throw new HttpException(
+      {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: error,
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
-  await Promise.all(promises);
-  functions.logger.log('User cleanup finished');
 };
 
 // --- Disable one inactive user from the list.
@@ -48,20 +73,24 @@ function disableUser(user: admin.auth.UserRecord) {
 
 // --- Returns the list of all inactive users.
 async function getInactiveUsers(
+  numDays,
   users: admin.auth.UserRecord[] = [],
   nextPageToken?: string,
 ): Promise<admin.auth.UserRecord[]> {
   const result = await admin.auth().listUsers(1000, nextPageToken);
+  console.log(result);
+
   // Find users that have not signed in in the last 90 days.
   const inactiveUsers: admin.auth.UserRecord[] = result.users.filter(
     (user) =>
       user.disabled === false &&
       Date.parse(user.metadata.lastSignInTime) <
-        Date.now() - 90 * 24 * 60 * 60 * 1000,
+        Date.now() - numDays * 24 * 60 * 60 * 1000,
   );
   users = users.concat(inactiveUsers);
   if (result.pageToken) {
-    return getInactiveUsers(users, result.pageToken);
+    return getInactiveUsers(numDays, users, result.pageToken);
   }
+
   return users;
 }

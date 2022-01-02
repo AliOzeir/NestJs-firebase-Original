@@ -3,6 +3,7 @@ import { admin } from '../../config/firebaseConnection';
 import * as bcrypt from 'bcrypt';
 import { getAuth, sendPasswordResetEmail } from '@firebase/auth';
 import { writeLogEntry } from '../logs/logs';
+import { disableInactiveUsers } from '../scheduled/disableUsers.scheduled';
 @Injectable()
 export class SecurityService {
   db = admin.firestore();
@@ -28,7 +29,6 @@ export class SecurityService {
           userEmail,
         );
         return {
-          status: HttpStatus.OK,
           message: `Hi ${email}, You have Successfully Received Password Reset Email`,
         };
       })
@@ -45,7 +45,10 @@ export class SecurityService {
           throw new HttpException(
             {
               status: HttpStatus.NOT_FOUND,
-              error: error,
+              error: {
+                code: error.code,
+                message: "This email doesn't belong to any user!",
+              },
             },
             HttpStatus.NOT_FOUND,
           );
@@ -61,15 +64,115 @@ export class SecurityService {
   }
 
   // --- Hash Password
-  async hashPassword(password: string) {
+  async setPasswordInDB(uid: string, password: string) {
     try {
       const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(password, salt);
-      return {
-        status: HttpStatus.OK,
-        message: 'Password Hashed Successfully!',
-        hash,
-      };
+      const hashPassword = await bcrypt.hash(password, salt);
+      const doc = this.db.collection('U-Pass').doc(uid);
+      return await doc
+        .get()
+        .then(async (docShot) => {
+          if (docShot.exists) {
+            const passwords = docShot.get('passwords');
+            if (passwords.length === 24) {
+              await doc
+                .update({
+                  passwords: admin.firestore.FieldValue.arrayRemove(
+                    passwords[0],
+                  ),
+                })
+                .catch((error) => {
+                  throw new HttpException(
+                    {
+                      status: HttpStatus.INTERNAL_SERVER_ERROR,
+                      error: error,
+                    },
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                  );
+                });
+            }
+            return await doc
+              .update({
+                passwords: admin.firestore.FieldValue.arrayUnion(hashPassword),
+              })
+              .then(async() => {
+                return await admin
+                  .auth()
+                  .setCustomUserClaims(uid, {
+                    lastChangedPassword: new Date(),
+                  })
+                  .then(() => {
+                    return {
+                      message:
+                        'Hashed Password has been Successfully added to Firestore!',
+                    };
+                  })
+                  .catch((error) => {
+                    throw new HttpException(
+                      {
+                        status: HttpStatus.INTERNAL_SERVER_ERROR,
+                        error: error,
+                      },
+                      HttpStatus.INTERNAL_SERVER_ERROR,
+                    );
+                  });
+              })
+              .catch((error) => {
+                throw new HttpException(
+                  {
+                    status: HttpStatus.INTERNAL_SERVER_ERROR,
+                    error: error,
+                  },
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                );
+              });
+          } else {
+            return await doc
+              .set({
+                passwords: [hashPassword],
+              })
+              .then(async () => {
+                return await admin
+                  .auth()
+                  .setCustomUserClaims(uid, {
+                    lastChangedPassword: new Date(),
+                  })
+                  .then(() => {
+                    return {
+                      message:
+                        'Hashed Password has been Successfully added to Firestore!',
+                    };
+                  })
+                  .catch((error) => {
+                    throw new HttpException(
+                      {
+                        status: HttpStatus.INTERNAL_SERVER_ERROR,
+                        error: error,
+                      },
+                      HttpStatus.INTERNAL_SERVER_ERROR,
+                    );
+                  });
+              })
+              .catch((error) => {
+                throw new HttpException(
+                  {
+                    status: HttpStatus.INTERNAL_SERVER_ERROR,
+                    error: error,
+                  },
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                );
+              });
+          }
+        })
+        .catch((error) => {
+          throw new HttpException(
+            {
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              error: error,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        });
     } catch (error) {
       throw new HttpException(
         {
@@ -82,13 +185,13 @@ export class SecurityService {
   }
 
   // --- Check if the passwords are equal
-  async checkPasswords(password: string, encryptedPassword: string) {
+  async checkPasswords(encryptedPassword: string, password: string) {
     try {
       const result = await bcrypt.compare(password, encryptedPassword);
       if (result) {
-        return { status: 204, message: 'Passwords Matched!' };
+        return true;
       } else {
-        return { status: 200, message: "Passwords Doesn't Match!" };
+        return false;
       }
     } catch (error) {
       throw new HttpException(
@@ -110,7 +213,6 @@ export class SecurityService {
       })
       .then(() => {
         return {
-          status: HttpStatus.OK,
           message:
             'Last Changed Password Date added Successfully to the Custom Claims!',
         };
@@ -126,73 +228,54 @@ export class SecurityService {
       });
   }
 
-  // --- Set Password in Firestore
-  async setNewPassword(uid: string, hashPassword: string) {
-    const doc = this.db.collection('U-Pass').doc(uid);
-    return await doc
+  // --- Get Users Hash Passwords
+  checkPreviousPasswords(uid: string, newPassword: string) {
+    return this.db
+      .collection('U-Pass')
+      .doc(uid)
       .get()
       .then(async (docShot) => {
         if (docShot.exists) {
-          const passwords = docShot.get('passwords');
-          if (passwords.length === 24) {
-            await doc
-              .update({
-                passwords: admin.firestore.FieldValue.arrayRemove(passwords[0]),
-              })
-              .catch((error) => {
-                throw new HttpException(
-                  {
-                    status: HttpStatus.INTERNAL_SERVER_ERROR,
-                    error: error,
-                  },
-                  HttpStatus.INTERNAL_SERVER_ERROR,
-                );
-              });
+          const passwords = docShot?.data()?.passwords;
+          if (passwords !== undefined || passwords.length !== 0) {
+            const responses = [];
+            for (const i in passwords) {
+              const response = this.checkPasswords(passwords[i], newPassword);
+              responses.push(response);
+            }
+            const responsesArray = await Promise.all(responses);
+            for (let i = 0; i < responsesArray.length; i++) {
+              if (responsesArray[i] === true) {
+                throw new Error('Passwords Match!');
+              }
+            }
+            return {
+              message: "New Password doesn't Match any Previous Password!",
+            };
+          } else {
+            throw new Error('No Passwords in Firestore!');
           }
-          return await doc
-            .update({
-              passwords: admin.firestore.FieldValue.arrayUnion(hashPassword),
-            })
-            .then(() => {
-              return {
-                status: HttpStatus.CREATED,
-                message:
-                  'Hashed Password has been Successfully added to Firestore!',
-              };
-            })
-            .catch((error) => {
-              throw new HttpException(
-                {
-                  status: HttpStatus.INTERNAL_SERVER_ERROR,
-                  error: error,
-                },
-                HttpStatus.INTERNAL_SERVER_ERROR,
-              );
-            });
-        } else {
-          return await doc
-            .set({
-              passwords: [hashPassword],
-            })
-            .then(() => {
-              return {
-                status: HttpStatus.CREATED,
-                message:
-                  'Hashed Password has been Successfully added to Firestore!',
-              };
-            })
-            .catch((error) => {
-              throw new HttpException(
-                {
-                  status: HttpStatus.INTERNAL_SERVER_ERROR,
-                  error: error,
-                },
-                HttpStatus.INTERNAL_SERVER_ERROR,
-              );
-            });
         }
       })
       .catch((error) => {
+        if (error.message === 'Passwords Match!') {
+          throw new HttpException(
+            {
+              status: HttpStatus.NO_CONTENT,
+              message: 'Passwords Match!',
+            },
+            HttpStatus.NO_CONTENT,
+          );
+        }
+        if (error.message === 'No Passwords in Firestore!') {
+          throw new HttpException(
+            {
+              status: HttpStatus.NOT_FOUND,
+              message: 'No Passwords in Firestore!',
+            },
+            HttpStatus.NOT_FOUND,
+          );
+        }
         throw new HttpException(
           {
             status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -203,40 +286,8 @@ export class SecurityService {
       });
   }
 
-  // --- Get Users Hash Passwords
-  getUsersHashedPasswords(uid: string) {
-    return this.db
-      .collection('U-Pass')
-      .doc(uid)
-      .get()
-      .then((docShot) => {
-        if (docShot.exists) {
-          const passwords = docShot?.data()?.passwords;
-          if (passwords !== undefined || passwords.length !== 0) {
-            return {
-              status: HttpStatus.OK,
-              message: 'Hashed Passwords Fetched Successfully!',
-              passwords,
-            };
-          } else {
-            throw new HttpException(
-              {
-                status: HttpStatus.NOT_FOUND,
-                message: 'No Passwords in Firestore!',
-              },
-              HttpStatus.NOT_FOUND,
-            );
-          }
-        }
-      })
-      .catch((error) => {
-        throw new HttpException(
-          {
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-            error: error,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      });
+  // --- Disable Inactive Users
+  disableInactiveUsers(numDays: number) {
+    return disableInactiveUsers(numDays);
   }
 }

@@ -21,8 +21,8 @@ paths:
                 email:
                   type: string
             example:
-              email: alioz-testing1234@gmail.com
-              password: password123
+              email: johndoe@itxi.net
+              password: johndoe123
       responses:
         '200':
           description: User Successfully Signed In
@@ -35,20 +35,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnauthorizedResponse'
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 401
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message: 
+                        type: string
+              examples:
+                Response 1:
+                  value: { "status": 401, "error": {"code": "auth/user-not-found","message": "Please check your email, and try again!"}}
+                Response 2:
+                  value: { "status": 401, "error": {"code": "auth/wrong-password","message": "Please check your password, and try again!"}}                    
         '428':
           description: Multi-factor Authentication Required
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: integer
-                    example: 428
-                  message:
-                    type: string
-                    example: auth/multi-factor-auth-required
+                $ref: '#/components/schemas/Multi-FactorResponse'
         '500':
           description: Internal Server Error
           content:
@@ -210,15 +219,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user: 
-                    type: object
-              example:
-                message: User Successfully Signed Up
-                user: {}
+                $ref: '#/components/schemas/UserInfo'
         '401':
           description: Unauthorized User
           content:
@@ -452,15 +453,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user: 
-                    type: object
-              example:
-                message: User Successfully deleted
-                user: {}
+                $ref: '#/components/schemas/UserInfo'
         '401':
           description: Unauthorized User
           content:
@@ -610,6 +603,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnauthorizedResponse'
+        '403':
+          description: Forbidden. Only Admins can Access these info.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  message:
+                    type: string
+              example:
+                statusCode: 403
+                message: You're not allowed to access this information.
+        '404':
+          description: User Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                  message:
+                    type: string
+              example:
+                statusCode: 404
+                message: This email doesn't belong to any user!
         '500':
           description: Internal Server Error
           content:
@@ -770,15 +791,12 @@ components:
           example: test@test.com
         password:
           type: string
-          example: password
-        phoneNumber:
-          type: string
-          example: '+96100112233'       
+          example: password      
         role:
           type: string
           example: Developer
     AuthenticationInfo:
-      description: contain user's information after successfull sign in process
+      description: contain user's information after successful sign in process
       properties:
         message:
           type: string
@@ -901,6 +919,68 @@ components:
                   email:
                     type: string
                     example: johndoe@itxi.net
+    Multi-FactorResponse:
+      description: Describe the response for users who are enrolled with Multi-factor authentication
+      properties:
+        status:
+          type: integer
+          example: 428
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: auth/multi-factor-auth-required      
+            customData:
+              type: object
+              properties:
+                appName:
+                  type: string
+                  example: '[DEFAULT]'
+                _serverResponse:
+                  type: object
+                  properties:
+                    kind: 
+                      type: string
+                      example: identitytoolkit#VerifyPasswordResponse
+                    localId:
+                      type: string
+                      example: tptkiV************31YZW2
+                    email: 
+                      type: string
+                      example: aozeir5@gmail.com
+                    registered:
+                      type: boolean
+                      example: true
+                    mfaPendingCredential:
+                      type: string
+                      example: AMzJoSmLvMRU5ldGvg63lSGthMKPt...
+                    mfaInfo:
+                      type: array
+                      items: 
+                        type: object
+                        properties:
+                          phoneInfo:
+                            type: string
+                            example: '+******1742'
+                          mfaEnrollmentId:
+                            type: string
+                            example: d490758a-****-4**d-****-853****c2249
+                          displayName:
+                            type: string
+                            example: phone number
+                          enrolledAt: 
+                            type: string
+                            example: '2021-12-27T10:14:46.913040Z'
+                operationType:
+                  type: string
+                  example: signIn
+            name:
+              type: string
+              example: FirebaseError
+            operationType:
+              type: string
+              example: signIn
     UnauthorizedResponse: 
       description: Response for Unauthorized Requests
       properties:
