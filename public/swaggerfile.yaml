@@ -49,9 +49,9 @@ paths:
                         type: string
               examples:
                 Response 1:
-                  value: { "status": 401, "error": {"code": "auth/user-not-found","message": "Please check your email, and try again!"}}
+                  value: { "status": 401, "error": {"code": "auth/user-not-found","message": "Invalid Email. Please check it, and try again!"}}
                 Response 2:
-                  value: { "status": 401, "error": {"code": "auth/wrong-password","message": "Please check your password, and try again!"}}                    
+                  value: { "status": 401, "error": {"code": "auth/wrong-password","message": "Wrong Password!"}}                    
         '428':
           description: Multi-factor Authentication Required
           content:
@@ -119,7 +119,7 @@ paths:
                 $ref: '#/components/schemas/ServerErrorResponse'
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/getAllusers:
+  /admin/getAllUsers:
     get:
       tags: [User Management]
       description: Get all users (Only Admins can call this API)
@@ -212,7 +212,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreation'
+              $ref: '#/components/schemas/UserCreationRequest'
       responses:
         '201':
           description: User Successfully Created
@@ -603,20 +603,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnauthorizedResponse'
-        '403':
-          description: Forbidden. Only Admins can Access these info.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: integer
-                  message:
-                    type: string
-              example:
-                statusCode: 403
-                message: You're not allowed to access this information.
         '404':
           description: User Not Found
           content:
@@ -666,7 +652,7 @@ paths:
                   message:
                     type: string
               example:
-                message: Password has been hashed successfully then added to Firestore!
+                message: Hashed Password has been Successfully added to Firestore!
         '401':
           description: Unauthorized User
           content:
@@ -734,35 +720,7 @@ paths:
                 $ref: '#/components/schemas/ServerErrorResponse'
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/addChangingPasswordDate:
-    post:
-      tags: [Used APIs]
-      description: Add Last Changed Password Date into User's Claims
-      responses:
-        '201':
-          description: Last Changed Password Date added successfully
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Last Changed Password Date added Successfully to the Custom Claims!
-        '401':
-          description: Unauthorized User
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnauthorizedResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServerErrorResponse'
-      servers:
-        - url: https://us-central1-itxi-train.cloudfunctions.net/
+
 components:
   schemas:
     FormatedUser:
@@ -777,7 +735,7 @@ components:
         role:
           type: string
           example: Developer
-    UserCreation:
+    UserCreationRequest:
       description: contain user's information
       properties:
         firstName:
@@ -867,7 +825,7 @@ components:
               type: string
               example: '[DEFAULT]'
     UserInfo:
-      description: contain all user's information after successfull fetch process
+      description: contain all user's information after successful fetch process
       properties:
         message:
           type: string
@@ -902,6 +860,56 @@ components:
                 role:
                   type: string
                   example: admin
+            providerData:
+              type: array
+              items:
+                type: object
+                properties:
+                  providerId:
+                    type: string
+                    example: password
+                  uid: 
+                    type: string
+                    example: johndoe@itxi.net
+                  displayName:
+                    type: string
+                    example: John Doe
+                  email:
+                    type: string
+                    example: johndoe@itxi.net
+    UserCreationResponse:
+      description: contain all user's information after successful creating process
+      properties:
+        message:
+          type: string
+          example: User Successfully Created
+        user:
+          type: object
+          properties:
+            uid:
+              type: string
+              example: A4F8A7gCnXexHVgNsCCXVzmPqn02      
+            email:
+              type: string
+              example: johndoe@itxi.net
+            emailverified:
+              type: boolean
+              example: true
+            displayName:
+              type: string
+              example: John Doe
+            metadata:
+              type: object
+              properties:
+                lastSignInTime: 
+                  type: string
+                  example: null
+                creationTime: 
+                  type: string
+                  example: Thu, 30 Dec 2021 06:32:30 GMT
+            tokensValidAfterTime:
+              type: string
+              example: Mon, 03 Jan 2022 06:24:55 GMT
             providerData:
               type: array
               items:

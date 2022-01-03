@@ -9,7 +9,7 @@ import { writeLogEntry } from '../logs/logs';
 import { Request, Response } from 'express';
 
 // --- User Sign In Using Email and Password
-export const signIn =  (req: Request, res: Response) => {
+export const signIn = (req: Request, res: Response) => {
   cors()(req, res, async () => {
     if (req.method !== 'POST') {
       res.status(404).json({
@@ -45,9 +45,7 @@ export const signIn =  (req: Request, res: Response) => {
       })
       .catch((error) => {
         writeLogEntry('ERROR', email, 'login_failed', ipAddress, error.message);
-        if (
-          error.code === 'auth/user-not-found'
-        ) {
+        if (error.code === 'auth/user-not-found') {
           res.status(401).json({
             status: 401,
             error: {
@@ -56,9 +54,7 @@ export const signIn =  (req: Request, res: Response) => {
             },
           });
         }
-        if (
-          error.code === 'auth/wrong-password'
-        ) {
+        if (error.code === 'auth/wrong-password') {
           res.status(401).json({
             status: 401,
             error: {
@@ -76,7 +72,7 @@ export const signIn =  (req: Request, res: Response) => {
 };
 
 // --- User Sign Up Using Email and Password
-export const signUp =  (req: Request, res: Response) => {
+export const signUp = (req: Request, res: Response) => {
   cors()(req, res, async () => {
     if (req.method !== 'POST') {
       res.status(404).json({

@@ -32,10 +32,7 @@ describe('AuthenticationService', () => {
     service
       .signIn(email, password, '169.192.24.12')
       .then((response) => {
-        expect(response.status).toEqual(200);
-        expect(response.message).toEqual(
-          `Hi ${email}, You have Successfully Signed In`,
-        );
+        expect(response.message).toEqual(`User Successfully Signed In`);
         expect(response.user.email).toEqual(email);
         done();
       })
@@ -46,8 +43,7 @@ describe('AuthenticationService', () => {
     service
       .createUserByEmailAndPass(newEmail, password)
       .then((response) => {
-        expect(response.status).toEqual(200);
-        expect(response.message).toEqual(`Email Verification sent`);
+        expect(response.message).toEqual(`User Successfully Signed Up`);
         expect(response.user.email).toEqual(newEmail);
         done();
       })

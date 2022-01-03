@@ -16,15 +16,9 @@ import { SecurityService } from './security.service';
 export class SecurityModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes(SecurityController);
-    consumer.apply(AdminMiddleware).forRoutes(
-      {
-        path: '/disableInactiveUsers',
-        method: RequestMethod.POST,
-      },
-      {
-        path: '/sendPasswordResetEmail',
-        method: RequestMethod.POST
-      },
-    );
+    consumer.apply(AdminMiddleware).forRoutes({
+      path: '/disableInactiveUsers',
+      method: RequestMethod.POST,
+    });
   }
 }

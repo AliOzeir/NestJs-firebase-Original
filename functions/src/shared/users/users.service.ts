@@ -157,10 +157,10 @@ export class UserService {
           }
         }
         const formattedUser = format(userData);
-        if (updatedBody.role?.trim()) {
-          await admin
-            .auth()
-            .setCustomUserClaims(uid, { role: updatedBody.role });
+        if (updatedBody.role?.trim() || updatedBody.role?.trim() === '') {
+          await admin.auth().setCustomUserClaims(uid, {
+            role: updatedBody.role ? updatedBody.role : null,
+          });
         }
         return await admin
           .auth()

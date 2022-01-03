@@ -33,7 +33,7 @@ describe('UserService', () => {
       .then((response) => {
         expect(response.message).toEqual('Fetched All Users Successfully!');
         expect.objectContaining(response.data);
-        expect(response.data).toBeNull();
+        expect(response.data).not.toBeNull();
         done();
       })
       .catch(done);

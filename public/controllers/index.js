@@ -35,9 +35,8 @@ auth.onAuthStateChanged(async (user) => {
       alert(
         "Your Password Has Been Expired, You need to change it immediately!"
       );
-      window.location.href = "updatePassword.html";
+      window.location.href = "reAuthenticate.html";
     }
-    
   } else {
     const signoutBtn = document.getElementById("signout");
     userEl.innerHTML = "No User is Currently Logging In";

@@ -95,7 +95,7 @@ export class SecurityService {
               .update({
                 passwords: admin.firestore.FieldValue.arrayUnion(hashPassword),
               })
-              .then(async() => {
+              .then(async () => {
                 return await admin
                   .auth()
                   .setCustomUserClaims(uid, {
