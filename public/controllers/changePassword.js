@@ -18,8 +18,8 @@ const allProcess = async (newPassword) => {
   loading.style.color = "green";
   loading.innerHTML = "Getting Data from Firestore...";
   document.body.style.cursor = "wait";
-  var status = await checkPreviousPasswords(newPassword)
-    if (status !== 200) {
+  var response = await evalCredential(newPassword, "CHECK")
+    if (response.data.success !== true) {
       loading.innerHTML = "";
       document.body.style.cursor = "default";
       alert("You can't set the same password twice!");
@@ -28,7 +28,10 @@ const allProcess = async (newPassword) => {
       auth.currentUser
         .updatePassword(newPassword)
         .then(async () => {
-          await setPasswordInDB(newPassword);
+          const response = await evalCredential(newPassword, "SAVE")
+          if(response.status !== 201){
+            throw "Can't set password in Firestore!"
+          }
           document.body.style.cursor = "default";
           loading.innerHTML = "Done!";
           window.location.href = "index.html";
@@ -42,30 +45,19 @@ const allProcess = async (newPassword) => {
     }
 };
 
-const setPasswordInDB = async (password) => {
+const evalCredential = async (password, option) => {
   const token = await auth.currentUser.getIdToken();
   const response = await axios({
     method: "post",
-    url: "https://us-central1-itxi-train.cloudfunctions.net/admin/setPasswordInDB",
+    url: "https://us-central1-itxi-train.cloudfunctions.net/evalCredential",
     headers: { Authorization: `Bearer ${token}` },
     data: {
       password,
+      option
     },
   });
   if (response.status === 500) {
     alert("Error:", response.data.error);
   }
-};
-
-const checkPreviousPasswords = async (password) => {
-  const token = await auth.currentUser.getIdToken();
-  const response = await axios({
-    method: "post",
-    url: "https://us-central1-itxi-train.cloudfunctions.net/admin/checkPreviousPasswords",
-    headers: { Authorization: `Bearer ${token}` },
-    data: {
-      password,
-    },
-  });
-  return response.status;
+  return response;
 };

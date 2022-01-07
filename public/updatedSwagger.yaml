@@ -21,8 +21,8 @@ paths:
                 email:
                   type: string
             example:
-              email: alioz-testing1234@gmail.com
-              password: password123
+              email: johndoe@itxi.net
+              password: johndoe123
       responses:
         '200':
           description: User Successfully Signed In
@@ -35,20 +35,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UnauthorizedResponse'
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 401
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message: 
+                        type: string
+              examples:
+                Response 1:
+                  value: { "status": 401, "error": {"code": "auth/user-not-found","message": "Invalid Email. Please check it, and try again!"}}
+                Response 2:
+                  value: { "status": 401, "error": {"code": "auth/wrong-password","message": "Wrong Password!"}}                    
         '428':
           description: Multi-factor Authentication Required
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: integer
-                    example: 428
-                  message:
-                    type: string
-                    example: auth/multi-factor-auth-required
+                $ref: '#/components/schemas/Multi-FactorResponse'
         '500':
           description: Internal Server Error
           content:
@@ -110,7 +119,7 @@ paths:
                 $ref: '#/components/schemas/ServerErrorResponse'
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/getAllusers:
+  /admin/getAllUsers:
     get:
       tags: [User Management]
       description: Get all users (Only Admins can call this API)
@@ -203,22 +212,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreation'
+              $ref: '#/components/schemas/UserCreationRequest'
       responses:
         '201':
           description: User Successfully Created
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user: 
-                    type: object
-              example:
-                message: User Successfully Signed Up
-                user: {}
+                $ref: '#/components/schemas/UserCreationResponse'
         '401':
           description: Unauthorized User
           content:
@@ -452,15 +453,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user: 
-                    type: object
-              example:
-                message: User Successfully deleted
-                user: {}
+                $ref: '#/components/schemas/UserInfo'
         '401':
           description: Unauthorized User
           content:
@@ -578,46 +571,6 @@ paths:
                 $ref: '#/components/schemas/ServerErrorResponse'
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/sendPasswordResetEmail:
-    post:
-      tags: [Used APIs]
-      description: Send Password Reset Email to the User based on the email given in the request body
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-            example:
-              email: aozeir5@gmail.com
-      responses:
-        '200':
-          description: Password Reset Email has been sent Successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: Hi aozeir5@gmail.com, You have Successfully Received Password Reset Email
-        '401':
-          description: Unauthorized User
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnauthorizedResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServerErrorResponse'
-      servers:
-        - url: https://us-central1-itxi-train.cloudfunctions.net/
   /admin/setPasswordInDB:
     post:
       tags: [Used APIs]
@@ -645,7 +598,7 @@ paths:
                   message:
                     type: string
               example:
-                message: Password has been hashed successfully then added to Firestore!
+                message: Hashed Password has been Successfully added to Firestore!
         '401':
           description: Unauthorized User
           content:
@@ -713,21 +666,71 @@ paths:
                 $ref: '#/components/schemas/ServerErrorResponse'
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/addChangingPasswordDate:
-    post:
+  /evalCredential:
+     post:
       tags: [Used APIs]
-      description: Add Last Changed Password Date into User's Claims
+      description: This API is responsible on checking if the new password matches previous set password, and on setting the new password in the Cloud Firestore after hashing it
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                option:
+                  type: string
+            examples:
+              Check Request:
+                value:
+                  password: password123
+                  option: CHECK
+              Save Request:
+                value:
+                  password: password123
+                  option: SAVE
       responses:
-        '201':
-          description: Last Changed Password Date added successfully
+        '200':
+          description: Only For CHECK Option / New Passwords Doesn't/Does Match a Previous Set Password!
           content:
-            application/json; charset=utf-8:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                Passwords Match:
+                  value:
+                    success: false
+                    message: The New Password matches one of the Previous Passwords!
+                Passwords Don't Match:
+                  value:
+                    success: true
+                    message: The New Password doesn't match any Previous Password!
+        '201':
+          description: Only For SAVE Option / New Password has been added to firestore
+          content:
+            application/json:
+              schema:
+                type: string
+                properties:
+                  message:
+                    type: string
+              example:
+                message: Hashed Password has been Successfully added to Firestore!
+        '404':
+          description: Passwords not found in Firestore
+          content:
+            application/json:
               schema:
                 type: object
                 properties:
                   message:
                     type: string
-                    example: Last Changed Password Date added Successfully to the Custom Claims!
+                    example: No Passwords in Firestore!
         '401':
           description: Unauthorized User
           content:
@@ -742,6 +745,7 @@ paths:
                 $ref: '#/components/schemas/ServerErrorResponse'
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
+
 components:
   schemas:
     FormatedUser:
@@ -756,7 +760,7 @@ components:
         role:
           type: string
           example: Developer
-    UserCreation:
+    UserCreationRequest:
       description: contain user's information
       properties:
         firstName:
@@ -770,15 +774,12 @@ components:
           example: test@test.com
         password:
           type: string
-          example: password
-        phoneNumber:
-          type: string
-          example: '+96100112233'       
+          example: password      
         role:
           type: string
           example: Developer
     AuthenticationInfo:
-      description: contain user's information after successfull sign in process
+      description: contain user's information after successful sign in process
       properties:
         message:
           type: string
@@ -849,7 +850,7 @@ components:
               type: string
               example: '[DEFAULT]'
     UserInfo:
-      description: contain all user's information after successfull fetch process
+      description: contain all user's information after successful fetch process
       properties:
         message:
           type: string
@@ -901,6 +902,118 @@ components:
                   email:
                     type: string
                     example: johndoe@itxi.net
+    UserCreationResponse:
+      description: contain all user's information after successful creating process
+      properties:
+        message:
+          type: string
+          example: User Successfully Created
+        user:
+          type: object
+          properties:
+            uid:
+              type: string
+              example: A4F8A7gCnXexHVgNsCCXVzmPqn02      
+            email:
+              type: string
+              example: johndoe@itxi.net
+            emailverified:
+              type: boolean
+              example: true
+            displayName:
+              type: string
+              example: John Doe
+            metadata:
+              type: object
+              properties:
+                lastSignInTime: 
+                  type: string
+                  example: null
+                creationTime: 
+                  type: string
+                  example: Thu, 30 Dec 2021 06:32:30 GMT
+            tokensValidAfterTime:
+              type: string
+              example: Mon, 03 Jan 2022 06:24:55 GMT
+            providerData:
+              type: array
+              items:
+                type: object
+                properties:
+                  providerId:
+                    type: string
+                    example: password
+                  uid: 
+                    type: string
+                    example: johndoe@itxi.net
+                  displayName:
+                    type: string
+                    example: John Doe
+                  email:
+                    type: string
+                    example: johndoe@itxi.net
+    Multi-FactorResponse:
+      description: Describe the response for users who are enrolled with Multi-factor authentication
+      properties:
+        status:
+          type: integer
+          example: 428
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: auth/multi-factor-auth-required      
+            customData:
+              type: object
+              properties:
+                appName:
+                  type: string
+                  example: '[DEFAULT]'
+                _serverResponse:
+                  type: object
+                  properties:
+                    kind: 
+                      type: string
+                      example: identitytoolkit#VerifyPasswordResponse
+                    localId:
+                      type: string
+                      example: tptkiV************31YZW2
+                    email: 
+                      type: string
+                      example: aozeir5@gmail.com
+                    registered:
+                      type: boolean
+                      example: true
+                    mfaPendingCredential:
+                      type: string
+                      example: AMzJoSmLvMRU5ldGvg63lSGthMKPt...
+                    mfaInfo:
+                      type: array
+                      items: 
+                        type: object
+                        properties:
+                          phoneInfo:
+                            type: string
+                            example: '+******1742'
+                          mfaEnrollmentId:
+                            type: string
+                            example: d490758a-****-4**d-****-853****c2249
+                          displayName:
+                            type: string
+                            example: phone number
+                          enrolledAt: 
+                            type: string
+                            example: '2021-12-27T10:14:46.913040Z'
+                operationType:
+                  type: string
+                  example: signIn
+            name:
+              type: string
+              example: FirebaseError
+            operationType:
+              type: string
+              example: signIn
     UnauthorizedResponse: 
       description: Response for Unauthorized Requests
       properties:

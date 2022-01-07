@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { admin } from '../../config/firebaseConnection';
 import * as bcrypt from 'bcrypt';
+import * as crypto from "crypto"
 import { getAuth, sendPasswordResetEmail } from '@firebase/auth';
 import { writeLogEntry } from '../logs/logs';
 import { disableInactiveUsers } from '../scheduled/disableUsers.scheduled';
@@ -289,5 +290,191 @@ export class SecurityService {
   // --- Disable Inactive Users
   disableInactiveUsers(numDays: number) {
     return disableInactiveUsers(numDays);
+  }
+
+  async evalCredential(uid: string, newPassword, option) {
+    if(option === 'CHECK'){
+      return this.db
+        .collection('U-Pass')
+        .doc(uid)
+        .get()
+        .then(async (docShot) => {
+          if (docShot.exists) {
+            const passwords = docShot?.data()?.passwords;
+            if (passwords !== undefined || passwords.length !== 0) {
+              const responses = [];
+              for (const i in passwords) {
+                const response = this.checkPasswords(passwords[i], newPassword);
+                responses.push(response);
+              }
+              const responsesArray = await Promise.all(responses);
+              for (let i = 0; i < responsesArray.length; i++) {
+                if (responsesArray[i] === true) {
+                  throw new Error('Passwords Match!');
+                }
+              }
+              return {
+                message: "New Password doesn't Match any Previous Password!",
+              };
+            } else {
+              throw new Error('No Passwords in Firestore!');
+            }
+          }
+        })
+        .catch((error) => {
+          if (error.message === 'Passwords Match!') {
+            throw new HttpException(
+              {
+                status: HttpStatus.NO_CONTENT,
+                message: 'Passwords Match!',
+              },
+              HttpStatus.NO_CONTENT,
+            );
+          }
+          if (error.message === 'No Passwords in Firestore!') {
+            throw new HttpException(
+              {
+                status: HttpStatus.NOT_FOUND,
+                message: 'No Passwords in Firestore!',
+              },
+              HttpStatus.NOT_FOUND,
+            );
+          }
+          throw new HttpException(
+            {
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              error: error,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        });
+    }else if(option === 'SAVE'){
+      try {
+        const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(newPassword, salt);
+        const doc = this.db.collection('U-Pass').doc(uid);
+        return await doc
+          .get()
+          .then(async (docShot) => {
+            if (docShot.exists) {
+              const passwords = docShot.get('passwords');
+              if (passwords.length === 24) {
+                await doc
+                  .update({
+                    passwords: admin.firestore.FieldValue.arrayRemove(
+                      passwords[0],
+                    ),
+                  })
+                  .catch((error) => {
+                    throw new HttpException(
+                      {
+                        status: HttpStatus.INTERNAL_SERVER_ERROR,
+                        error: error,
+                      },
+                      HttpStatus.INTERNAL_SERVER_ERROR,
+                    );
+                  });
+              }
+              return await doc
+                .update({
+                  passwords:
+                    admin.firestore.FieldValue.arrayUnion(hashPassword),
+                })
+                .then(async () => {
+                  return await admin
+                    .auth()
+                    .setCustomUserClaims(uid, {
+                      lastChangedPassword: new Date(),
+                    })
+                    .then(() => {
+                      return {
+                        message:
+                          'Hashed Password has been Successfully added to Firestore!',
+                      };
+                    })
+                    .catch((error) => {
+                      throw new HttpException(
+                        {
+                          status: HttpStatus.INTERNAL_SERVER_ERROR,
+                          error: error,
+                        },
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                      );
+                    });
+                })
+                .catch((error) => {
+                  throw new HttpException(
+                    {
+                      status: HttpStatus.INTERNAL_SERVER_ERROR,
+                      error: error,
+                    },
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                  );
+                });
+            } else {
+              return await doc
+                .set({
+                  passwords: [hashPassword],
+                })
+                .then(async () => {
+                  return await admin
+                    .auth()
+                    .setCustomUserClaims(uid, {
+                      lastChangedPassword: new Date(),
+                    })
+                    .then(() => {
+                      return {
+                        message:
+                          'Hashed Password has been Successfully added to Firestore!',
+                      };
+                    })
+                    .catch((error) => {
+                      throw new HttpException(
+                        {
+                          status: HttpStatus.INTERNAL_SERVER_ERROR,
+                          error: error,
+                        },
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                      );
+                    });
+                })
+                .catch((error) => {
+                  throw new HttpException(
+                    {
+                      status: HttpStatus.INTERNAL_SERVER_ERROR,
+                      error: error,
+                    },
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                  );
+                });
+            }
+          })
+          .catch((error) => {
+            throw new HttpException(
+              {
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                error: error,
+              },
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+          });
+      } catch (error) {
+        throw new HttpException(
+          {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            error: error,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }else{
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: `Invalid Option. ${option} is not valid!`,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

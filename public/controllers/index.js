@@ -3,6 +3,10 @@ const auth = firebase.auth();
 // Listen to User's Auth State
 auth.onAuthStateChanged(async (user) => {
   const userEl = document.getElementById("user");
+  const lastChangedPasswordDate = document.getElementById(
+    "lastChangedPasswordDate"
+  );
+  lastChangedPasswordDate.style.fontSize = "0.75rem";
   const verifyEmailBtn = document.getElementById("verifyemail");
   verifyEmailBtn.disabled = true;
 
@@ -30,6 +34,10 @@ auth.onAuthStateChanged(async (user) => {
 
     const IdTokenInfo = await user.getIdTokenResult(true);
     const lastChangedPassword = IdTokenInfo.claims.lastChangedPassword;
+    lastChangedPasswordDate.innerHTML = `Last Changed Password Date was on <span class="loggedInUser">${lastChangedPassword.substr(
+      0,
+      10
+    )} : ${lastChangedPassword.substr(11, 5)}</span>`;
     const isExpired = passwordExpired(lastChangedPassword);
     if (isExpired) {
       alert(
@@ -40,6 +48,7 @@ auth.onAuthStateChanged(async (user) => {
   } else {
     const signoutBtn = document.getElementById("signout");
     userEl.innerHTML = "No User is Currently Logging In";
+    lastChangedPasswordDate.innerHTML = "";
     changePasswordBtn.style.display = "none";
     signoutBtn.style.display = "none";
     enrollBtn.style.display = "none";

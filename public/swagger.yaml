@@ -219,7 +219,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserInfo'
+                $ref: '#/components/schemas/UserCreationResponse'
         '401':
           description: Unauthorized User
           content:
@@ -288,7 +288,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormattedUser'
+                $ref: '#/components/schemas/FormatedUser'
       responses:
         '200':
           description: User has been updated
@@ -571,79 +571,52 @@ paths:
                 $ref: '#/components/schemas/ServerErrorResponse'
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/sendPasswordResetEmail:
-    post:
-      tags: [Used APIs]
-      description: Send Password Reset Email to the User based on the email given in the request body
+  /evalCredential:
+     post:
+      tags: [Credentials-Firestore Integration]
+      description: This API is responsible on checking if the new password matches previous set password, and on setting the new password in the Cloud Firestore after hashing it
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                email:
+                password:
                   type: string
-            example:
-              email: aozeir5@gmail.com
+                option:
+                  type: string
+            examples:
+              Check Request:
+                value:
+                  password: password123
+                  option: CHECK
+              Save Request:
+                value:
+                  password: password123
+                  option: SAVE
       responses:
         '200':
-          description: Password Reset Email has been sent Successfully
+          description: Only For CHECK Option / New Passwords Doesn't/Does Match a Previous Set Password!
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  success:
+                    type: boolean
                   message:
                     type: string
-              example:
-                message: Hi aozeir5@gmail.com, You have Successfully Received Password Reset Email
-        '401':
-          description: Unauthorized User
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnauthorizedResponse'
-        '404':
-          description: User Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: integer
-                  message:
-                    type: string
-              example:
-                statusCode: 404
-                message: This email doesn't belong to any user!
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServerErrorResponse'
-      servers:
-        - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/setPasswordInDB:
-    post:
-      tags: [Used APIs]
-      description: Hash the new password we are getting from the body, then Set it in Firestore
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                uid:
-                  type: string
-                hashPassword:
-                  type: string
-            example:
-              password: password123
-      responses:
+              examples:
+                Passwords Match:
+                  value:
+                    success: false
+                    message: The New Password matches one of the Previous Passwords!
+                Passwords Don't Match:
+                  value:
+                    success: true
+                    message: The New Password doesn't match any Previous Password!
         '201':
-          description: New Password has been added to firestore
+          description: Only For SAVE Option / New Password has been added to firestore
           content:
             application/json:
               schema:
@@ -653,51 +626,8 @@ paths:
                     type: string
               example:
                 message: Hashed Password has been Successfully added to Firestore!
-        '401':
-          description: Unauthorized User
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnauthorizedResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServerErrorResponse'
-      servers:
-        - url: https://us-central1-itxi-train.cloudfunctions.net/
-  /admin/checkPreviousPasswords:
-    post:
-      tags: [Used APIs]
-      description: Gets the hashed passwords from Firestore then compare them with the new password
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                password:
-                  type: string
-                EncryptedPassword:
-                  type: string
-            example:
-              password: password123
-      responses:
-        '200':
-          description: Passwords Doesn't Match!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: New Password doesn't Match any Previous Password!
-        '204':
-          description: Password matches with one of the passwords stored in DB
         '404':
-          description: Passwords not found in Firestore
+          description: Only For CHECK Option / Passwords not found in Firestore
           content:
             application/json:
               schema:
@@ -721,9 +651,9 @@ paths:
       servers:
         - url: https://us-central1-itxi-train.cloudfunctions.net/
 
-components: 
+components:
   schemas:
-    FormattedUser:
+    FormatedUser:
       description: contain user's information
       properties:
         firstName:
@@ -735,9 +665,6 @@ components:
         role:
           type: string
           example: Developer
-        disabled:
-          type: boolean
-          example: false
     UserCreationRequest:
       description: contain user's information
       properties:

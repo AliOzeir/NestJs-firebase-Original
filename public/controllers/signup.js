@@ -16,7 +16,7 @@ signupBtn.onclick = async (e) => {
     );
     loading.innerHTML = "Saving Password...";
     let promises = [];
-    const settingNewPassword = setPasswordInDB(password);
+    const settingNewPassword = evalCredential(password, "SAVE")
     promises.push(settingNewPassword);
     loading.innerHTML = "Sending Email Verification Link...";
     const sendingEmail = credential.user.sendEmailVerification();
@@ -33,17 +33,19 @@ signupBtn.onclick = async (e) => {
   }
 };
 
-const setPasswordInDB = async (password) => {
+const evalCredential = async (password, option) => {
   const token = await auth.currentUser.getIdToken();
   const response = await axios({
     method: "post",
-    url: "https://us-central1-itxi-train.cloudfunctions.net/admin/setPasswordInDB",
+    url: "https://us-central1-itxi-train.cloudfunctions.net/evalCredential",
     headers: { Authorization: `Bearer ${token}` },
     data: {
       password,
+      option,
     },
   });
   if (response.status === 500) {
     alert("Error:", response.data.error);
   }
+  return response;
 };

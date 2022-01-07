@@ -78,8 +78,6 @@ async function getInactiveUsers(
   nextPageToken?: string,
 ): Promise<admin.auth.UserRecord[]> {
   const result = await admin.auth().listUsers(1000, nextPageToken);
-  console.log(result);
-
   // Find users that have not signed in in the last 90 days.
   const inactiveUsers: admin.auth.UserRecord[] = result.users.filter(
     (user) =>
